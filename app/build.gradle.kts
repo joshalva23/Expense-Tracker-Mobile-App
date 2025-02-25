@@ -9,8 +9,7 @@ plugins {
 
 android {
     namespace = "com.joshdev.expensetracker"
-    compileSdk = 34
-
+    compileSdk = 35
     defaultConfig {
         applicationId = "com.joshdev.expensetracker"
         minSdk = 24
@@ -60,9 +59,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-
     implementation(libs.appcompat)
-    implementation(libs.material)
 
     // Lifecycle
     implementation(libs.lifecycle.viewmodel)
@@ -81,6 +78,7 @@ dependencies {
     // Room Database (KSP)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
 
     // Security
     implementation(libs.biometric)
@@ -88,4 +86,8 @@ dependencies {
     // Hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+//    implementation(libs.hilt.lifecycle)
+//    implementation(libs.hilt.navigation)
+
+    implementation(libs.androidx.navigation.compose)
 }
