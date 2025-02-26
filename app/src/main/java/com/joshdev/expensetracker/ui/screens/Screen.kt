@@ -22,6 +22,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.joshdev.expensetracker.data.entity.CategoryEntity
 import com.joshdev.expensetracker.data.entity.ExpenseEntity
 import com.joshdev.expensetracker.data.entity.IncomeEntity
+import com.joshdev.expensetracker.data.entity.Transaction
 import com.joshdev.expensetracker.ui.viewmodel.ExpenseViewModel
 import com.joshdev.expensetracker.ui.viewmodel.IncomeViewModel
 import com.joshdev.expensetracker.utils.CurrencyUtils
@@ -45,26 +46,33 @@ fun DashboardScreen(
     val totalExpenses = result.totalExpense
     val totalIncome = result.totalIncome
     val netBalance = result.netBalance
-    val sortedExpenses = expenses.sortedByDescending { it.date }.toMutableList()
-    val sortedIncomes = incomes.sortedByDescending { it.date }.toMutableList()
-    val mergedTransactions = mutableListOf<Pair<Any, String>>()
 
-    while (sortedExpenses.isNotEmpty() || sortedIncomes.isNotEmpty()) {
-        when {
-            sortedExpenses.isEmpty() -> {
-                mergedTransactions.add(sortedIncomes.removeAt(0) to "income")
-            }
-            sortedIncomes.isEmpty() -> {
-                mergedTransactions.add(sortedExpenses.removeAt(0) to "expense")
-            }
-            sortedExpenses.first().date >= sortedIncomes.first().date -> {
-                mergedTransactions.add(sortedExpenses.removeAt(0) to "expense")
-            }
-            else -> {
-                mergedTransactions.add(sortedIncomes.removeAt(0) to "income")
-            }
-        }
-    }
+    val mixedTransactions : MutableList<Transaction> = mutableListOf()
+    expenses.forEach{ mixedTransactions.add(it) }
+    incomes.forEach{ mixedTransactions.add(it) }
+
+    val sortedList = mixedTransactions.sortedByDescending { it.date }
+
+//    val sortedExpenses = expenses.sortedByDescending { it.date }.toMutableList()
+//    val sortedIncomes = incomes.sortedByDescending { it.date }.toMutableList()
+//    val mergedTransactions = mutableListOf<Pair<Any, String>>()
+
+//    while (sortedExpenses.isNotEmpty() || sortedIncomes.isNotEmpty()) {
+//        when {
+//            sortedExpenses.isEmpty() -> {
+//                mergedTransactions.add(sortedIncomes.removeAt(0) to "income")
+//            }
+//            sortedIncomes.isEmpty() -> {
+//                mergedTransactions.add(sortedExpenses.removeAt(0) to "expense")
+//            }
+//            sortedExpenses.first().date >= sortedIncomes.first().date -> {
+//                mergedTransactions.add(sortedExpenses.removeAt(0) to "expense")
+//            }
+//            else -> {
+//                mergedTransactions.add(sortedIncomes.removeAt(0) to "income")
+//            }
+//        }
+//    }
 
     Scaffold(
         topBar = {
@@ -103,7 +111,7 @@ fun DashboardScreen(
                         color = MaterialTheme.colorScheme.error
                     )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Divider()
+                    HorizontalDivider()
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Net Balance: ${CurrencyUtils.getDefaultCurrency()} $netBalance",
@@ -127,11 +135,11 @@ fun DashboardScreen(
                     .padding(horizontal = 16.dp)
                     .padding(top = 8.dp)
             ) {
-                items(mergedTransactions) { (transaction, type) ->
+                items(sortedList) { transaction ->
                     val categoryName: String =
                         categories.find {
-                            it.id == (transaction as? ExpenseEntity)?.categoryId
-                                    ?: (transaction as? IncomeEntity)?.categoryId
+                            (it.id == ((transaction as? ExpenseEntity)?.categoryId
+                                ?: (transaction as? IncomeEntity)?.categoryId))
                         }?.name ?: ""
                     Card(
                         modifier = Modifier
@@ -144,10 +152,10 @@ fun DashboardScreen(
                             horizontal = 12.dp,
                             vertical = 4.dp
                         )) {
-                            if (type == "expense") {
-                                ExpenseItem(transaction as ExpenseEntity, categoryName)
-                            } else {
-                                IncomeItem(transaction as IncomeEntity, categoryName)
+                            if (transaction is ExpenseEntity) {
+                                ExpenseItem(transaction , categoryName)
+                            } else if(transaction is IncomeEntity) {
+                                IncomeItem(transaction , categoryName)
                             }
                         }
                     }
@@ -370,8 +378,6 @@ fun ExpenseItem(
     var showMenu by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
 
-    var formattedDate:String = DateUtils.formatDate(expense.date)
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -408,7 +414,7 @@ fun ExpenseItem(
 
                     // Date tag (assuming expense.date is a String or formatted appropriately)
                     Text(
-                        "$formattedDate",
+                        DateUtils.formatDate(expense.date),
                         style = MaterialTheme.typography.bodySmall.copy(color = Color.Black),
                         modifier = Modifier
                             .background(Color(0xFFBDBDBD), RoundedCornerShape(8.dp))
@@ -546,8 +552,6 @@ fun IncomeItem(
     var showMenu by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
 
-    var formattedDate:String = DateUtils.formatDate(income.date)
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -590,7 +594,7 @@ fun IncomeItem(
 
                     // Date tag (formatted)
                     Text(
-                        "$formattedDate",
+                        DateUtils.formatDate(income.date),
                         style = MaterialTheme.typography.bodySmall.copy(color = Color.Black),
                         modifier = Modifier
                             .background(Color(0xFFBDBDBD), RoundedCornerShape(8.dp))

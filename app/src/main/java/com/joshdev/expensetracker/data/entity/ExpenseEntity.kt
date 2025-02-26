@@ -4,16 +4,22 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
+open class Transaction(
+    open val title:String,
+    open val amount: Double,
+    open val date:Long
+)
+
 @Entity(
     tableName = "expenses"
 )
 data class ExpenseEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val title: String,
-    val amount: Double,
-    val date: Long,
+    override val title: String,
+    override val amount: Double,
+    override val date: Long,
     val categoryId: Int
-)
+) : Transaction(title, amount, date)
 
 @Entity(
     tableName = "categories",
@@ -30,11 +36,11 @@ data class CategoryEntity(
 )
 data class IncomeEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val title:String,
-    val amount: Double,
-    val date: Long,
+    override val title:String,
+    override val amount: Double,
+    override val date: Long,
     val categoryId: Int
-)
+): Transaction(title, amount, date)
 
 data class ExpenseWithCategory(
     val id: Int,
