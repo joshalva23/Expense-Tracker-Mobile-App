@@ -1,5 +1,10 @@
 package com.joshdev.expensetracker.ui.screens
 
+
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,21 +19,151 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.joshdev.expensetracker.data.entity.CategoryEntity
 import com.joshdev.expensetracker.data.entity.ExpenseEntity
 import com.joshdev.expensetracker.data.entity.IncomeEntity
 import com.joshdev.expensetracker.data.entity.Transaction
+import com.joshdev.expensetracker.keys.Keys
+import com.joshdev.expensetracker.ui.viewmodel.AuthViewModel
 import com.joshdev.expensetracker.ui.viewmodel.ExpenseViewModel
 import com.joshdev.expensetracker.ui.viewmodel.IncomeViewModel
 import com.joshdev.expensetracker.utils.CurrencyUtils
 import com.joshdev.expensetracker.utils.DateUtils
 import com.joshdev.expensetracker.utils.ExpenseUtils
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
+
+@Composable
+fun AuthScreen(
+    authViewModel: AuthViewModel,
+    onSignInSuccess: () -> Unit)
+{
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    var isSignedIn by remember { mutableStateOf(false) }
+    var showSuccessMessage by remember { mutableStateOf(false) }
+
+    val googleSignInClient = remember {
+        GoogleSignIn.getClient(
+            context,
+            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(Keys.FIREBASE_AUTH_CLIENT_ID)
+                .requestEmail()
+                .build()
+        )
+    }
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val data = result.data
+        if (data != null) {
+            authViewModel.handleGoogleSignInResult(data) { success, message ->
+                if (success) {
+                    isSignedIn = true
+                    showSuccessMessage = true
+
+                    coroutineScope.launch {
+                        delay(2000)
+                        onSignInSuccess()
+                    }
+                } else {
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("Sign-In Failed: $message")
+                    }
+                }
+            }
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            AnimatedVisibility(
+                visible = showSuccessMessage,
+                enter = fadeIn() // ✅ Smooth fade-in effect
+            ) {
+                Text("Sign-in Successful!", style = MaterialTheme.typography.headlineMedium)
+            }
+
+            if (!isSignedIn) {
+                Text("Welcome to Expense Tracker", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        val signInIntent = googleSignInClient.signInIntent
+                        launcher.launch(signInIntent)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Sign in with Google")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun ProfileScreen( authViewModel: AuthViewModel = viewModel() ) {
+    val user by authViewModel.user.collectAsState()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Profile") })
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (user != null) {
+                // Display User Name & Email
+                Text(
+                    text = user?.name ?: "No Name",
+                    style = MaterialTheme.typography.headlineMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = user?.email ?: "No Email",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                // Logout Button
+                Button(
+                    onClick = {
+                        authViewModel.signOut()
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Logout")
+                }
+            }
+        }
+    }
+}
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
