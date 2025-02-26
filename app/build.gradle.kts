@@ -75,6 +75,8 @@ dependencies {
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.ml)
 
+    implementation(libs.google.play.auth)
+
     // Room Database (KSP)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)

@@ -20,6 +20,8 @@ firebase-auth = "latest.release"
 firebase-firestore = "latest.release"
 firebase-ml = "latest.release"
 
+google-play-auth = "20.7.0"
+
 # Database
 room = "2.5.2"
 ksp = "2.0.0-1.0.24"
@@ -69,6 +71,8 @@ firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "fir
 firebase-auth = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebase-auth" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore-ktx", version.ref = "firebase-firestore" }
 firebase-ml = { module = "com.google.firebase:firebase-ml-model-interpreter", version.ref = "firebase-ml" }
+
+google-play-auth = { module="com.google.android.gms:play-services-auth", version.ref = "google-play-auth"}
 
 # Room Database
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
