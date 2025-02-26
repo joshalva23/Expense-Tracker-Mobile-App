@@ -1,12 +1,16 @@
 package com.joshdev.expensetracker
 
 import android.os.Bundle
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
+import com.joshdev.expensetracker.auth.firebase.repository.AuthRepository
 import com.joshdev.expensetracker.data.local.ExpenseDatabase
 import com.joshdev.expensetracker.data.repository.ExpenseRepository
 import com.joshdev.expensetracker.ui.navigation.ExpenseTrackerApp
+import com.joshdev.expensetracker.ui.viewmodel.AuthViewModel
+import com.joshdev.expensetracker.ui.viewmodel.AuthViewModelFactory
 import com.joshdev.expensetracker.ui.viewmodel.ExpenseViewModel
 import com.joshdev.expensetracker.ui.viewmodel.ExpenseViewModelFactory
 import com.joshdev.expensetracker.ui.viewmodel.IncomeViewModel
@@ -68,8 +72,11 @@ class MainActivity : ComponentActivity() {
 
         val incomeViewModel = ViewModelProvider(this, incomeFactory)[IncomeViewModel::class.java]
 
+        val authRepository = AuthRepository()
+        val authFactory = AuthViewModelFactory(authRepository)
+        val authViewModel = ViewModelProvider(this, authFactory)[AuthViewModel::class.java]
         setContent {
-            ExpenseTrackerApp(expenseViewModel, incomeViewModel)
+            ExpenseTrackerApp(expenseViewModel, incomeViewModel, authViewModel)
         }
     }
 }
