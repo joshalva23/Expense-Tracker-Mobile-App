@@ -1,6 +1,8 @@
 package com.joshdev.expensetracker.ui.navigation
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -13,8 +15,11 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
-//import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.unit.dp
 import com.joshdev.expensetracker.ui.screens.DashboardScreen
 import com.joshdev.expensetracker.ui.screens.ExpenseScreen
 import com.joshdev.expensetracker.ui.viewmodel.ExpenseViewModel
@@ -53,12 +58,17 @@ fun BottomNavBar(navController: NavHostController) {
         Screen.Expenses,
         Screen.Income
     )
-    NavigationBar {
+    NavigationBar(
+        modifier = Modifier.padding(16.dp)
+            .clip(RoundedCornerShape(40.dp)),
+        containerColor = Color(red = 200, green = 200, blue = 200, alpha = 80)
+
+    ) {
         items.forEach { screen ->
             NavigationBarItem(
                 icon = { Icon(screen.icon, contentDescription = screen.title) },
                 label = { Text(screen.title) },
-                selected = false, // Can be updated to show selection state
+                selected = false,
                 onClick = { navController.navigate(screen.route) }
             )
         }
