@@ -25,6 +25,9 @@ interface ExpenseDao {
     @Query("SELECT * FROM expenses ORDER BY date DESC")
     fun getAllExpenses(): Flow<List<ExpenseEntity>>
 
+    @Query("DELETE FROM expenses")
+    suspend fun deleteAll()
+
     @Query("SELECT e.*, c.name AS categoryName, c.icon AS categoryIcon " +
             "FROM expenses AS e " +
             "INNER JOIN categories AS c ON e.categoryId = c.id " +
@@ -55,4 +58,6 @@ interface ExpenseDao {
 
     @Query("SELECT * FROM expenses WHERE syncId = :syncId LIMIT 1")
     suspend fun getExpenseBySyncId(syncId: String): ExpenseEntity?
+
+
 }

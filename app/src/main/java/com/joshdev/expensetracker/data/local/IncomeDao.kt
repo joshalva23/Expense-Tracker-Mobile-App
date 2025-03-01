@@ -30,14 +30,15 @@ interface IncomeDao {
     @Query("SELECT * FROM income ORDER BY date DESC")
     fun getAllIncomes(): Flow<List<IncomeEntity>>
 
+    @Query("DELETE FROM income")
+    suspend fun deleteAll()
+
     @Query("SELECT * FROM income WHERE id = :incomeId")
     suspend fun getIncomeById(incomeId: Int): IncomeEntity?
 
     @Query("SELECT * FROM income WHERE categoryId = :categoryId ORDER BY date DESC")
     fun getIncomesByCategory(categoryId: Int): Flow<List<IncomeEntity>>
 
-    @Query("SELECT SUM(amount) FROM income")
-    fun getTotalIncome(): Flow<Double>
 
     @Query("SELECT * FROM income WHERE isSynced = 0")
     suspend fun getUnsyncedIncomes(): List<IncomeEntity>
