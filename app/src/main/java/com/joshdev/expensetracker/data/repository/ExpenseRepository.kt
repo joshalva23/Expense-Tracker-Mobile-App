@@ -7,6 +7,7 @@ import com.joshdev.expensetracker.data.entity.IncomeEntity
 import com.joshdev.expensetracker.data.local.ExpenseDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlin.math.exp
 
 class ExpenseRepository(private val expenseDatabase: ExpenseDatabase) {
 
@@ -98,5 +99,45 @@ class ExpenseRepository(private val expenseDatabase: ExpenseDatabase) {
 
     fun getTotalIncome(): Flow<Double> {
         return incomeDao.getTotalIncome()
+    }
+
+    suspend fun markExpenseAsSynced(id: Int){
+        expenseDao.markExpenseAsSynced(id)
+    }
+
+    suspend fun deleteSyncedExpenses(){
+        expenseDao.deleteSyncedExpenses()
+    }
+
+    suspend fun updateExpenseSyncId(id:Int, syncId:String){
+        expenseDao.updateSyncId(id, syncId)
+    }
+
+    suspend fun getUnSyncedExpenses(): List<ExpenseEntity>{
+        return expenseDao.getUnsyncedExpenses()
+    }
+
+    suspend fun getExpenseBySyncId(syncId:String):ExpenseEntity?{
+        return expenseDao.getExpenseBySyncId(syncId)
+    }
+
+    suspend fun markIncomeAsSynced(id:Int){
+        incomeDao.markIncomeAsSynced(id)
+    }
+
+    suspend fun deleteSyncedIncomes(){
+        incomeDao.deleteSyncedIncomes()
+    }
+
+    suspend fun updateIncomeSyncId(id:Int, syncId: String){
+        incomeDao.updateSyncId(id, syncId)
+    }
+
+    suspend fun getUnSyncedIncomes(): List<IncomeEntity>{
+        return incomeDao.getUnsyncedIncomes()
+    }
+
+    suspend fun getIncomeBySyncId(syncId:String): IncomeEntity?{
+        return incomeDao.getIncomeBySyncId(syncId)
     }
 }
