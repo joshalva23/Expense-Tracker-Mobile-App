@@ -38,4 +38,20 @@ interface IncomeDao {
 
     @Query("SELECT SUM(amount) FROM income")
     fun getTotalIncome(): Flow<Double>
+
+    @Query("SELECT * FROM income WHERE isSynced = 0")
+    fun getUnsyncedIncomes(): List<IncomeEntity>
+
+    @Query("DELETE FROM income WHERE isSynced = 1")
+    suspend fun deleteSyncedIncomes()
+
+    @Query("UPDATE income SET isSynced = 1 WHERE id = :incomeId")
+    suspend fun markIncomeAsSynced(incomeId: Int)
+
+    @Query("UPDATE income SET syncId = :syncId WHERE id = :incomeId")
+    suspend fun updateSyncId(incomeId: Int, syncId: String)
+
+    @Query("SELECT * FROM income WHERE syncId = :syncId LIMIT 1")
+    suspend fun getIncomeBySyncId(syncId: String): IncomeEntity?
+
 }
