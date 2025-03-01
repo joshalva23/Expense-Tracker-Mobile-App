@@ -1,13 +1,15 @@
 package com.joshdev.expensetracker
 
 import android.os.Bundle
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.lifecycle.ViewModelProvider
-import com.joshdev.expensetracker.auth.firebase.repository.AuthRepository
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import com.joshdev.expensetracker.firebase.auth.repository.AuthRepository
 import com.joshdev.expensetracker.data.local.ExpenseDatabase
 import com.joshdev.expensetracker.data.repository.ExpenseRepository
+import com.joshdev.expensetracker.firebase.firestore.FirebaseSyncManager
 import com.joshdev.expensetracker.ui.navigation.ExpenseTrackerApp
 import com.joshdev.expensetracker.ui.viewmodel.AuthViewModel
 import com.joshdev.expensetracker.ui.viewmodel.AuthViewModelFactory
@@ -75,8 +77,15 @@ class MainActivity : ComponentActivity() {
         val authRepository = AuthRepository()
         val authFactory = AuthViewModelFactory(authRepository)
         val authViewModel = ViewModelProvider(this, authFactory)[AuthViewModel::class.java]
+
+        val firebaseSyncManager = FirebaseSyncManager(
+            Firebase.firestore,
+            database,
+            authRepository
+        )
+
         setContent {
-            ExpenseTrackerApp(expenseViewModel, incomeViewModel, authViewModel)
+            ExpenseTrackerApp(expenseViewModel, incomeViewModel, authViewModel, firebaseSyncManager)
         }
     }
 }
