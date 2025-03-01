@@ -42,7 +42,6 @@ class AuthRepository {
 
     fun signOut() {
         firebaseAuth.signOut()
-        _authUserFlow.value = null
     }
 
     fun getUser(): AuthUser? {
