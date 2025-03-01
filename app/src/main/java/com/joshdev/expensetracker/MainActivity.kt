@@ -20,40 +20,54 @@ import com.joshdev.expensetracker.ui.viewmodel.IncomeViewModelFactory
 import com.joshdev.expensetracker.usecase.category.GetCategoriesUseCase
 import com.joshdev.expensetracker.usecase.expense.AddExpenseUseCase
 import com.joshdev.expensetracker.usecase.expense.DeleteExpenseUseCase
+import com.joshdev.expensetracker.usecase.expense.DeleteSyncedExpensesUseCase
+import com.joshdev.expensetracker.usecase.expense.ExpenseUseCases
+import com.joshdev.expensetracker.usecase.expense.GetExpenseBySyncIdUseCase
 import com.joshdev.expensetracker.usecase.expense.GetExpensesUseCase
 import com.joshdev.expensetracker.usecase.expense.GetSortedExpensesUseCase
+import com.joshdev.expensetracker.usecase.expense.GetUnSyncedExpensesUseCase
+import com.joshdev.expensetracker.usecase.expense.MarkExpenseAsSyncUseCase
+import com.joshdev.expensetracker.usecase.expense.UpdateExpenseSyncIdUseCase
 import com.joshdev.expensetracker.usecase.expense.UpdateExpenseUseCase
 import com.joshdev.expensetracker.usecase.income.AddIncomeUseCase
 import com.joshdev.expensetracker.usecase.income.DeleteIncomeByIdUseCase
 import com.joshdev.expensetracker.usecase.income.DeleteIncomeUseCase
+import com.joshdev.expensetracker.usecase.income.DeleteSyncedIncomesUseCase
 import com.joshdev.expensetracker.usecase.income.GetAllIncomesUseCase
 import com.joshdev.expensetracker.usecase.income.GetIncomeByIdUseCase
+import com.joshdev.expensetracker.usecase.income.GetIncomeBySyncIdUseCase
+import com.joshdev.expensetracker.usecase.income.GetUnSyncedIncomesUseCase
 import com.joshdev.expensetracker.usecase.income.IncomeUseCases
+import com.joshdev.expensetracker.usecase.income.MarkIncomeAsSyncUseCase
+import com.joshdev.expensetracker.usecase.income.UpdateIncomeSyncIdUseCase
 import com.joshdev.expensetracker.usecase.income.UpdateIncomeUseCase
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Initialize database and repository
+
         val database = ExpenseDatabase.getInstance(this)
         val repository = ExpenseRepository(database)
 
-        // Initialize use cases
-        val addExpenseUseCase = AddExpenseUseCase(repository)
-        val deleteExpenseUseCase = DeleteExpenseUseCase(repository)
-        val updateExpenseUseCase = UpdateExpenseUseCase(repository)
-        val getExpensesUseCase = GetExpensesUseCase(repository)
-        val getSortedExpensesUseCase = GetSortedExpensesUseCase(repository)
+
         val getCategoriesUseCase = GetCategoriesUseCase(repository)
 
-        // Initialize ViewModel
+        val expenseUseCases = ExpenseUseCases(
+            addExpense = AddExpenseUseCase(repository),
+            deleteExpense = DeleteExpenseUseCase(repository),
+            getExpense = GetExpensesUseCase(repository),
+            getSortedExpense =  GetSortedExpensesUseCase(repository),
+            updateExpense = UpdateExpenseUseCase(repository),
+            markExpenseAsSync = MarkExpenseAsSyncUseCase(repository),
+            updateExpenseSyncId = UpdateExpenseSyncIdUseCase(repository),
+            deleteSyncedExpenses = DeleteSyncedExpensesUseCase(repository),
+            getUnSyncedExpenses = GetUnSyncedExpensesUseCase(repository),
+            getExpenseBySyncId = GetExpenseBySyncIdUseCase(repository)
+        )
+
         val expenseFactory = ExpenseViewModelFactory(
-            addExpenseUseCase,
-            deleteExpenseUseCase,
-            updateExpenseUseCase,
-            getExpensesUseCase,
-            getSortedExpensesUseCase,
+            expenseUseCases,
             getCategoriesUseCase
         )
         val expenseViewModel = ViewModelProvider(this, expenseFactory)[ExpenseViewModel::class.java]
@@ -64,7 +78,12 @@ class MainActivity : ComponentActivity() {
             getIncomeById = GetIncomeByIdUseCase(repository),
             updateIncome = UpdateIncomeUseCase(repository),
             deleteIncome = DeleteIncomeUseCase(repository),
-            deleteIncomeById = DeleteIncomeByIdUseCase(repository)
+            deleteIncomeById = DeleteIncomeByIdUseCase(repository),
+            markIncomeAsSync = MarkIncomeAsSyncUseCase(repository),
+            deleteSyncedIncomes = DeleteSyncedIncomesUseCase(repository),
+            updateIncomeSyncId = UpdateIncomeSyncIdUseCase(repository),
+            getUnSyncedIncomes = GetUnSyncedIncomesUseCase(repository),
+            getIncomeBySyncId = GetIncomeBySyncIdUseCase(repository)
         )
 
         val incomeFactory = IncomeViewModelFactory(
@@ -79,8 +98,9 @@ class MainActivity : ComponentActivity() {
         val authViewModel = ViewModelProvider(this, authFactory)[AuthViewModel::class.java]
 
         val firebaseSyncManager = FirebaseSyncManager(
-            Firebase.firestore,
-            database,
+            firestore = Firebase.firestore,
+            expensesUseCase = expenseUseCases,
+            incomeUseCase = incomeUseCases,
             authRepository
         )
 
