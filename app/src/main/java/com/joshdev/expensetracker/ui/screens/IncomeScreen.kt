@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -20,9 +21,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.joshdev.expensetracker.data.entity.IncomeEntity
 import com.joshdev.expensetracker.ui.screens.components.AddIncomeDialog
@@ -32,7 +35,7 @@ import com.joshdev.expensetracker.ui.viewmodel.IncomeViewModel
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun IncomeScreen(viewModel: IncomeViewModel = viewModel()) {
-    val incomeList by viewModel.incomes.collectAsState()
+    val incomes by viewModel.incomes.collectAsState()
     val categories by viewModel.categories.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
@@ -49,19 +52,29 @@ fun IncomeScreen(viewModel: IncomeViewModel = viewModel()) {
         }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(incomeList) { income ->
-                    val categoryName: String = categories.find { it.id == income.categoryId }?.name ?: ""
-                    IncomeItem(
-                        income = income,
-                        categoryName = categoryName,
-                        categories = categories,
-                        onEdit = { updatedIncome -> viewModel.updateIncome(updatedIncome) },
-                        onDelete = { viewModel.deleteIncome(it) }
-                    )
+            if (incomes.isEmpty()) {
+                Text(
+                    text = "No Incomes found",
+                    modifier = Modifier.align(Alignment.Center),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp),
+                    color = Color.Gray
+                )
+            }else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(incomes) { income ->
+                        val categoryName: String =
+                            categories.find { it.id == income.categoryId }?.name ?: ""
+                        IncomeItem(
+                            income = income,
+                            categoryName = categoryName,
+                            categories = categories,
+                            onEdit = { updatedIncome -> viewModel.updateIncome(updatedIncome) },
+                            onDelete = { viewModel.deleteIncome(it) }
+                        )
+                    }
                 }
             }
         }
