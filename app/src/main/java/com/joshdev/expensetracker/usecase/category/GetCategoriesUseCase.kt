@@ -9,7 +9,5 @@ class GetCategoriesUseCase(private val expenseRepository: ExpenseRepository) {
         return expenseRepository.getAllCategories()
     }
 
-    suspend fun getCategoryById(categoryId:Int): CategoryEntity?{
-        return expenseRepository.getCategoryById(categoryId)
-    }
+
 }
