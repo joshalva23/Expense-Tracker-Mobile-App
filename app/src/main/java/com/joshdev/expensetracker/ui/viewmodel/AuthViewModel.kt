@@ -4,9 +4,8 @@ import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.joshdev.expensetracker.auth.entity.AuthUser
-import com.joshdev.expensetracker.auth.firebase.repository.AuthRepository
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.joshdev.expensetracker.firebase.auth.entity.AuthUser
+import com.joshdev.expensetracker.firebase.auth.repository.AuthRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
