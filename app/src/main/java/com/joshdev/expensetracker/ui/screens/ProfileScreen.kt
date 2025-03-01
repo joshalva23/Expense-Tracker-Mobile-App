@@ -105,9 +105,8 @@ fun ProfileScreen(
                                 onClick = {
                                     val selectedDateMillis = datePickerState.selectedDateMillis
                                     if (selectedDateMillis != null) {
-                                        val startDate = selectedDateMillis
                                         coroutineScope.launch {
-                                            firebaseSyncManager.fetchBackup(startDate)
+                                            firebaseSyncManager.fetchBackup(selectedDateMillis)
                                             Toast.makeText(context, "Fetching Data...", Toast.LENGTH_SHORT).show()
                                         }
                                     }
@@ -145,6 +144,9 @@ fun ProfileScreen(
 
                 Button(
                     onClick = {
+                        coroutineScope.launch {
+                            firebaseSyncManager.deleteAllData()
+                        }
                         authViewModel.signOut()
                     },
                     modifier = Modifier.fillMaxWidth()
