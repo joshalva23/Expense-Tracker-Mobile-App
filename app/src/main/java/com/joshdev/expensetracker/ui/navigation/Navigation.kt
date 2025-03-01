@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.joshdev.expensetracker.firebase.firestore.FirebaseSyncManager
 import com.joshdev.expensetracker.ui.screens.AuthScreen
 import com.joshdev.expensetracker.ui.screens.DashboardScreen
 import com.joshdev.expensetracker.ui.screens.ExpenseScreen
@@ -44,7 +45,8 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 fun ExpenseTrackerApp(
     expenseViewModel: ExpenseViewModel,
     incomeViewModel: IncomeViewModel,
-    authViewModel: AuthViewModel
+    authViewModel: AuthViewModel,
+    firebaseSyncManager: FirebaseSyncManager
     ) {
     val navController = rememberNavController()
 
@@ -81,7 +83,7 @@ fun ExpenseTrackerApp(
             composable(Screen.Dashboard.route) { DashboardScreen(expenseViewModel, incomeViewModel) }
             composable(Screen.Expenses.route) { ExpenseScreen(expenseViewModel) }
             composable(Screen.Income.route) { IncomeScreen(incomeViewModel) }
-            composable(Screen.Profile.route) { ProfileScreen(authViewModel) }
+            composable(Screen.Profile.route) { ProfileScreen(authViewModel, firebaseSyncManager) }
         }
     }
 }
