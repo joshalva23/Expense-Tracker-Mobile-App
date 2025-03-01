@@ -1,6 +1,7 @@
 package com.joshdev.expensetracker.ui.screens
 
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -31,6 +32,7 @@ import com.joshdev.expensetracker.data.entity.CategoryEntity
 import com.joshdev.expensetracker.data.entity.ExpenseEntity
 import com.joshdev.expensetracker.data.entity.IncomeEntity
 import com.joshdev.expensetracker.data.entity.Transaction
+import com.joshdev.expensetracker.firebase.firestore.FirebaseSyncManager
 import com.joshdev.expensetracker.keys.Keys
 import com.joshdev.expensetracker.ui.viewmodel.AuthViewModel
 import com.joshdev.expensetracker.ui.viewmodel.ExpenseViewModel
@@ -38,6 +40,8 @@ import com.joshdev.expensetracker.ui.viewmodel.IncomeViewModel
 import com.joshdev.expensetracker.utils.CurrencyUtils
 import com.joshdev.expensetracker.utils.DateUtils
 import com.joshdev.expensetracker.utils.ExpenseUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -97,7 +101,7 @@ fun AuthScreen(
         ) {
             AnimatedVisibility(
                 visible = showSuccessMessage,
-                enter = fadeIn() // ✅ Smooth fade-in effect
+                enter = fadeIn()
             ) {
                 Text("Sign-in Successful!", style = MaterialTheme.typography.headlineMedium)
             }
@@ -121,8 +125,17 @@ fun AuthScreen(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun ProfileScreen( authViewModel: AuthViewModel = viewModel() ) {
+fun ProfileScreen(
+    authViewModel: AuthViewModel = viewModel(),
+    firebaseSyncManager: FirebaseSyncManager
+) {
     val user by authViewModel.user.collectAsState()
+
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    val datePickerState = rememberDatePickerState()
+    val showDatePicker = remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -138,7 +151,7 @@ fun ProfileScreen( authViewModel: AuthViewModel = viewModel() ) {
             verticalArrangement = Arrangement.Center
         ) {
             if (user != null) {
-                // Display User Name & Email
+
                 Text(
                     text = user?.name ?: "No Name",
                     style = MaterialTheme.typography.headlineMedium,
@@ -149,9 +162,76 @@ fun ProfileScreen( authViewModel: AuthViewModel = viewModel() ) {
                     style = MaterialTheme.typography.bodyLarge
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Logout Button
+
+                Button(
+                    onClick = {
+                        coroutineScope.launch{
+                            firebaseSyncManager.startBackup()
+                            Toast.makeText(context, "Backing Up Data...", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Backup Data")
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Button(
+                    onClick = { showDatePicker.value = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Fetch Data")
+                }
+
+                if (showDatePicker.value) {
+                    DatePickerDialog(
+                        onDismissRequest = { showDatePicker.value = false },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    val selectedDateMillis = datePickerState.selectedDateMillis
+                                    if (selectedDateMillis != null) {
+                                        val startDate = selectedDateMillis
+                                        coroutineScope.launch {
+                                            firebaseSyncManager.fetchBackup(startDate)
+                                            Toast.makeText(context, "Fetching Data...", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                    showDatePicker.value = false
+                                }
+                            ) {
+                                Text("OK")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDatePicker.value = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    ) {
+                        DatePicker(state = datePickerState)
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Button(
+                    onClick = {
+                        coroutineScope.launch{
+                            firebaseSyncManager.deleteSyncedData()
+                            Toast.makeText(context, "Deleting Sync Data...", Toast.LENGTH_SHORT).show()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Delete Synced Data")
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
                 Button(
                     onClick = {
                         authViewModel.signOut()
@@ -352,7 +432,9 @@ fun ExpenseScreen(viewModel: ExpenseViewModel = viewModel()) {
                         title = title,
                         amount = amount,
                         date = System.currentTimeMillis(),
-                        categoryId = categoryId
+                        categoryId = categoryId,
+                        isSynced = false,
+                        syncId = null
                     )
                 )
                 showDialog = false
@@ -667,7 +749,9 @@ fun IncomeScreen(viewModel: IncomeViewModel = viewModel()) {
                         title = title,
                         amount = amount,
                         date = System.currentTimeMillis(),
-                        categoryId = categoryId
+                        categoryId = categoryId,
+                        isSynced = false,
+                        syncId = null
                     )
                 )
                 showDialog = false
