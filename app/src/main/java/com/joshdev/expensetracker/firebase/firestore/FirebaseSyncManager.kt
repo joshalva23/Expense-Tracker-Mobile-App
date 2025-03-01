@@ -148,6 +148,13 @@ class FirebaseSyncManager(
         expensesUseCase.deleteSyncedExpenses()
     }
 
+    private suspend fun deleteAllExpenses(){
+        expensesUseCase.deleteAllExpenses()
+    }
+
+    private suspend fun deleteAllIncomes(){
+        incomeUseCase.deleteAllIncomes()
+    }
 
     suspend fun startBackup(){
         syncExpensesToFirebase()
@@ -163,5 +170,10 @@ class FirebaseSyncManager(
     suspend fun deleteSyncedData(){
         deleteSyncedExpenses()
         deleteSyncedIncomes()
+    }
+
+    suspend fun deleteAllData(){
+        deleteAllExpenses()
+        deleteAllIncomes()
     }
 }
