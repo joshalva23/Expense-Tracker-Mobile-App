@@ -19,6 +19,7 @@ import com.joshdev.expensetracker.ui.viewmodel.IncomeViewModel
 import com.joshdev.expensetracker.ui.viewmodel.IncomeViewModelFactory
 import com.joshdev.expensetracker.usecase.category.GetCategoriesUseCase
 import com.joshdev.expensetracker.usecase.expense.AddExpenseUseCase
+import com.joshdev.expensetracker.usecase.expense.DeleteAllExpensesUseCase
 import com.joshdev.expensetracker.usecase.expense.DeleteExpenseUseCase
 import com.joshdev.expensetracker.usecase.expense.DeleteSyncedExpensesUseCase
 import com.joshdev.expensetracker.usecase.expense.ExpenseUseCases
@@ -30,6 +31,7 @@ import com.joshdev.expensetracker.usecase.expense.MarkExpenseAsSyncUseCase
 import com.joshdev.expensetracker.usecase.expense.UpdateExpenseSyncIdUseCase
 import com.joshdev.expensetracker.usecase.expense.UpdateExpenseUseCase
 import com.joshdev.expensetracker.usecase.income.AddIncomeUseCase
+import com.joshdev.expensetracker.usecase.income.DeleteAllIncomesUseCase
 import com.joshdev.expensetracker.usecase.income.DeleteIncomeByIdUseCase
 import com.joshdev.expensetracker.usecase.income.DeleteIncomeUseCase
 import com.joshdev.expensetracker.usecase.income.DeleteSyncedIncomesUseCase
@@ -63,7 +65,8 @@ class MainActivity : ComponentActivity() {
             updateExpenseSyncId = UpdateExpenseSyncIdUseCase(repository),
             deleteSyncedExpenses = DeleteSyncedExpensesUseCase(repository),
             getUnSyncedExpenses = GetUnSyncedExpensesUseCase(repository),
-            getExpenseBySyncId = GetExpenseBySyncIdUseCase(repository)
+            getExpenseBySyncId = GetExpenseBySyncIdUseCase(repository),
+            deleteAllExpenses = DeleteAllExpensesUseCase(repository)
         )
 
         val expenseFactory = ExpenseViewModelFactory(
@@ -83,7 +86,8 @@ class MainActivity : ComponentActivity() {
             deleteSyncedIncomes = DeleteSyncedIncomesUseCase(repository),
             updateIncomeSyncId = UpdateIncomeSyncIdUseCase(repository),
             getUnSyncedIncomes = GetUnSyncedIncomesUseCase(repository),
-            getIncomeBySyncId = GetIncomeBySyncIdUseCase(repository)
+            getIncomeBySyncId = GetIncomeBySyncIdUseCase(repository),
+            deleteAllIncomes = DeleteAllIncomesUseCase(repository)
         )
 
         val incomeFactory = IncomeViewModelFactory(
