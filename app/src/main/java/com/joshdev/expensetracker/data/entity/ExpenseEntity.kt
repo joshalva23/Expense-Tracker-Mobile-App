@@ -4,22 +4,37 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 
-open class Transaction(
-    open val title:String,
-    open val amount: Double,
-    open val date:Long
-)
+interface Transaction {
+    val title: String
+    val amount: Double
+    val date: Long
+    val isSynced: Boolean
+    val syncId: String?
+}
 
 @Entity(
     tableName = "expenses"
 )
 data class ExpenseEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    override val title: String,
-    override val amount: Double,
-    override val date: Long,
-    val categoryId: Int
-) : Transaction(title, amount, date)
+    override val title: String ="",
+    override val amount: Double = 0.0,
+    override val date: Long = 0L,
+    val categoryId: Int = -1,
+    override val isSynced: Boolean = false,
+    override val syncId: String? = null
+) : Transaction {
+    fun toMutableMap(): MutableMap<String, Any?> {
+        return mutableMapOf(
+            "title" to title,
+            "amount" to amount,
+            "date" to date,
+            "categoryId" to categoryId,
+            "isSynced" to isSynced,
+            "syncId" to syncId
+        )
+    }
+}
 
 @Entity(
     tableName = "categories",
@@ -36,11 +51,24 @@ data class CategoryEntity(
 )
 data class IncomeEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    override val title:String,
-    override val amount: Double,
-    override val date: Long,
-    val categoryId: Int
-): Transaction(title, amount, date)
+    override val title: String ="",
+    override val amount: Double = 0.0,
+    override val date: Long = 0L,
+    val categoryId: Int = -1,
+    override val isSynced: Boolean = false,
+    override val syncId: String? = null
+): Transaction {
+    fun toMutableMap(): MutableMap<String, Any?> {
+        return mutableMapOf(
+            "title" to title,
+            "amount" to amount,
+            "date" to date,
+            "categoryId" to categoryId,
+            "isSynced" to isSynced,
+            "syncId" to syncId
+        )
+    }
+}
 
 data class ExpenseWithCategory(
     val id: Int,
