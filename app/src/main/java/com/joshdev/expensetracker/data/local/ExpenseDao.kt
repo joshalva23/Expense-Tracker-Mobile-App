@@ -42,7 +42,7 @@ interface ExpenseDao {
     fun getExpensesSortedByDate(): Flow<List<ExpenseEntity>>
 
     @Query("SELECT * FROM expenses WHERE isSynced = 0")
-    fun getUnsyncedExpenses(): List<ExpenseEntity>
+    suspend fun getUnsyncedExpenses(): List<ExpenseEntity>
 
     @Query("DELETE FROM expenses WHERE isSynced = 1")
     suspend fun deleteSyncedExpenses()

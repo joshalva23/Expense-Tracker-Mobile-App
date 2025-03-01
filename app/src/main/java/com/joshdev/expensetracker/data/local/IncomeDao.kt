@@ -40,7 +40,7 @@ interface IncomeDao {
     fun getTotalIncome(): Flow<Double>
 
     @Query("SELECT * FROM income WHERE isSynced = 0")
-    fun getUnsyncedIncomes(): List<IncomeEntity>
+    suspend fun getUnsyncedIncomes(): List<IncomeEntity>
 
     @Query("DELETE FROM income WHERE isSynced = 1")
     suspend fun deleteSyncedIncomes()
