@@ -3,10 +3,9 @@ package com.joshdev.expensetracker.firebase.firestore
 import com.google.firebase.firestore.FirebaseFirestore
 import com.joshdev.expensetracker.data.entity.ExpenseEntity
 import com.joshdev.expensetracker.data.entity.IncomeEntity
-import com.joshdev.expensetracker.data.local.ExpenseDao
-import com.joshdev.expensetracker.data.local.ExpenseDatabase
-import com.joshdev.expensetracker.data.local.IncomeDao
 import com.joshdev.expensetracker.firebase.auth.repository.AuthRepository
+import com.joshdev.expensetracker.usecase.expense.ExpenseUseCases
+import com.joshdev.expensetracker.usecase.income.IncomeUseCases
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -14,19 +13,18 @@ import kotlinx.coroutines.withContext
 
 class FirebaseSyncManager(
     private val firestore: FirebaseFirestore,
-    private val expenseDatabase: ExpenseDatabase,
+    private val expensesUseCase: ExpenseUseCases,
+    private val incomeUseCase: IncomeUseCases,
     private val authRepository: AuthRepository
 ) {
 
-    private val expenseDao: ExpenseDao = expenseDatabase.expenseDao()
-    private val incomeDao: IncomeDao = expenseDatabase.incomeDao()
     private val expensesCollection = firestore.collection("expenses")
     private val incomesCollection = firestore.collection("incomes")
 
     private suspend fun syncExpensesToFirebase() = withContext(Dispatchers.IO) {
         val user = authRepository.getUser()
         user?.let {
-            val unsyncedExpenses: List<ExpenseEntity> = expenseDao.getUnsyncedExpenses()
+            val unsyncedExpenses: List<ExpenseEntity> = expensesUseCase.getUnSyncedExpenses()
 
             unsyncedExpenses.forEach { expense ->
                 val documentRef = if (expense.syncId.isNullOrEmpty()) {
@@ -44,8 +42,8 @@ class FirebaseSyncManager(
 
                 try {
                     documentRef.set(expenseData).await()
-                    expenseDao.updateSyncId(expense.id, documentRef.id)
-                    expenseDao.markExpenseAsSynced(expense.id)
+                    expensesUseCase.updateExpenseSyncId(expense.id, documentRef.id)
+                    expensesUseCase.markExpenseAsSync(expense.id)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -60,7 +58,7 @@ class FirebaseSyncManager(
         val user = authRepository.getUser()
 
         user?.let {
-            val unsyncedIncomes = incomeDao.getUnsyncedIncomes()
+            val unsyncedIncomes = incomeUseCase.getUnSyncedIncomes()
             unsyncedIncomes.forEach { income ->
                 val documentRef = if (income.syncId.isNullOrEmpty()) {
                     incomesCollection.document()
@@ -78,9 +76,8 @@ class FirebaseSyncManager(
                 try {
                     documentRef.set(incomeData).await()
 
-
-                    incomeDao.updateSyncId(income.id, documentRef.id)
-                    incomeDao.markIncomeAsSynced(income.id)
+                    incomeUseCase.updateIncomeSyncId(income.id, documentRef.id)
+                    incomeUseCase.markIncomeAsSync(income.id)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -104,9 +101,9 @@ class FirebaseSyncManager(
                         ?.copy(syncId = doc.id, isSynced = true)
 
                     expense?.let {
-                        val existingExpense = expenseDao.getExpenseBySyncId(doc.id)
+                        val existingExpense = expensesUseCase.getExpenseBySyncId(doc.id)
                         if (existingExpense == null) {
-                            expenseDao.insertExpense(expense)
+                            expensesUseCase.addExpense(expense)
                         }
                     }
                 }
@@ -131,9 +128,9 @@ class FirebaseSyncManager(
                         ?.copy(syncId = doc.id, isSynced = true)
 
                     income?.let {
-                        val existingIncome = incomeDao.getIncomeBySyncId(doc.id)
+                        val existingIncome = incomeUseCase.getIncomeBySyncId(doc.id)
                         if (existingIncome == null) {
-                            incomeDao.insertIncome(income)
+                            incomeUseCase.addIncome(income)
                         }
                     }
                 }
@@ -144,11 +141,11 @@ class FirebaseSyncManager(
     }
 
     private suspend fun deleteSyncedIncomes(){
-        incomeDao.deleteSyncedIncomes()
+        incomeUseCase.deleteSyncedIncomes()
     }
 
     private suspend fun deleteSyncedExpenses(){
-        expenseDao.deleteSyncedExpenses()
+        expensesUseCase.deleteSyncedExpenses()
     }
 
 
