@@ -1,4 +1,4 @@
-package com.joshdev.expensetracker.auth.entity
+package com.joshdev.expensetracker.firebase.auth.entity
 
 data class AuthUser(
     val uid: String,

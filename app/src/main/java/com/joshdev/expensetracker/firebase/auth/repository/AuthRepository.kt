@@ -1,4 +1,4 @@
-package com.joshdev.expensetracker.auth.firebase.repository
+package com.joshdev.expensetracker.firebase.auth.repository
 
 import android.content.Intent
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -6,7 +6,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import com.joshdev.expensetracker.auth.entity.AuthUser
+import com.joshdev.expensetracker.firebase.auth.entity.AuthUser
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -45,7 +45,7 @@ class AuthRepository {
         _authUserFlow.value = null
     }
 
-    private fun getUser(): AuthUser? {
+    fun getUser(): AuthUser? {
         val firebaseUser: FirebaseUser? = firebaseAuth.currentUser
         return firebaseUser?.let {
             AuthUser(
