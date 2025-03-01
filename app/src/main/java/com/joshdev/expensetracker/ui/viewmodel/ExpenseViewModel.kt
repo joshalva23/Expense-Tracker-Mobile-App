@@ -11,17 +11,14 @@ import com.joshdev.expensetracker.data.entity.ExpenseWithCategory
 import com.joshdev.expensetracker.usecase.category.GetCategoriesUseCase
 import com.joshdev.expensetracker.usecase.expense.AddExpenseUseCase
 import com.joshdev.expensetracker.usecase.expense.DeleteExpenseUseCase
+import com.joshdev.expensetracker.usecase.expense.ExpenseUseCases
 import com.joshdev.expensetracker.usecase.expense.GetExpensesUseCase
 import com.joshdev.expensetracker.usecase.expense.GetSortedExpensesUseCase
 import com.joshdev.expensetracker.usecase.expense.UpdateExpenseUseCase
 import kotlinx.coroutines.delay
 
 class ExpenseViewModel(
-    private val addExpenseUseCase: AddExpenseUseCase,
-    private val deleteExpenseUseCase: DeleteExpenseUseCase,
-    private val updateExpenseUseCase: UpdateExpenseUseCase,
-    private val getExpensesUseCase: GetExpensesUseCase,
-    private val getSortedExpensesUseCase: GetSortedExpensesUseCase,
+    private val expenseUseCases: ExpenseUseCases,
     private val getCategoriesUseCase: GetCategoriesUseCase
 ) : ViewModel() {
 
@@ -49,7 +46,6 @@ class ExpenseViewModel(
     private fun loadCategories() {
         viewModelScope.launch {
             getCategoriesUseCase().collect { categoryList ->
-                println("Fetched Categories: $categoryList")
                 _categories.value = categoryList
             }
         }
@@ -57,7 +53,7 @@ class ExpenseViewModel(
 
     private fun loadExpenses() {
         viewModelScope.launch {
-            getExpensesUseCase().collect { expenseList ->
+            expenseUseCases.getExpense().collect { expenseList ->
                 _expenses.value = expenseList
             }
         }
@@ -65,28 +61,28 @@ class ExpenseViewModel(
 
     fun addExpense(expense: ExpenseEntity) {
         viewModelScope.launch {
-            addExpenseUseCase(expense)
+            expenseUseCases.addExpense(expense)
             loadExpenses()
         }
     }
 
     fun deleteExpense(expense: ExpenseEntity) {
         viewModelScope.launch {
-            deleteExpenseUseCase(expense)
+            expenseUseCases.deleteExpense(expense)
             loadExpenses()
         }
     }
 
     fun updateExpense(expense: ExpenseEntity) {
         viewModelScope.launch {
-            updateExpenseUseCase(expense)
+            expenseUseCases.updateExpense(expense)
             loadExpenses()
         }
     }
 
     fun loadExpensesSortedByDate() {
         viewModelScope.launch {
-            getSortedExpensesUseCase.byDate().collect { sortedList ->
+            expenseUseCases.getSortedExpense.byDate().collect { sortedList ->
                 _sortedExpenses.value = sortedList
             }
         }
@@ -94,7 +90,7 @@ class ExpenseViewModel(
 
     fun loadExpensesSortedByCategory() {
         viewModelScope.launch {
-            getSortedExpensesUseCase.byCategory().collect { sortedList ->
+            expenseUseCases.getSortedExpense.byCategory().collect { sortedList ->
                 _sortedExpenses.value = sortedList
             }
         }
@@ -102,22 +98,14 @@ class ExpenseViewModel(
 }
 
 class ExpenseViewModelFactory(
-    private val addExpenseUseCase: AddExpenseUseCase,
-    private val deleteExpenseUseCase: DeleteExpenseUseCase,
-    private val updateExpenseUseCase: UpdateExpenseUseCase,
-    private val getExpensesUseCase: GetExpensesUseCase,
-    private val getSortedExpensesUseCase: GetSortedExpensesUseCase,
+    private val expenseUseCases: ExpenseUseCases,
     private val getCategoriesUseCase: GetCategoriesUseCase
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(ExpenseViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return ExpenseViewModel(
-                addExpenseUseCase,
-                deleteExpenseUseCase,
-                updateExpenseUseCase,
-                getExpensesUseCase,
-                getSortedExpensesUseCase,
+                expenseUseCases,
                 getCategoriesUseCase
             ) as T
         }
