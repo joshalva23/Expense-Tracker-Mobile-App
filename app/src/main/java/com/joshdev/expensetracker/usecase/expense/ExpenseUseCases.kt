@@ -10,5 +10,6 @@ data class ExpenseUseCases (
     val updateExpenseSyncId: UpdateExpenseSyncIdUseCase,
     val updateExpense: UpdateExpenseUseCase,
     val getUnSyncedExpenses: GetUnSyncedExpensesUseCase,
-    val getExpenseBySyncId: GetExpenseBySyncIdUseCase
+    val getExpenseBySyncId: GetExpenseBySyncIdUseCase,
+    val deleteAllExpenses: DeleteAllExpensesUseCase
 )

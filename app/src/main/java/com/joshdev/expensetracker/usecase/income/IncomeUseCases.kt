@@ -11,5 +11,6 @@ data class IncomeUseCases(
     val updateIncomeSyncId: UpdateIncomeSyncIdUseCase,
     val markIncomeAsSync: MarkIncomeAsSyncUseCase,
     val getUnSyncedIncomes: GetUnSyncedIncomesUseCase,
-    val getIncomeBySyncId: GetIncomeBySyncIdUseCase
+    val getIncomeBySyncId: GetIncomeBySyncIdUseCase,
+    val deleteAllIncomes: DeleteAllIncomesUseCase
 )
