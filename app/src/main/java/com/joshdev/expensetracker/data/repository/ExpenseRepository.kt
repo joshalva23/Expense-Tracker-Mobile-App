@@ -7,7 +7,6 @@ import com.joshdev.expensetracker.data.entity.IncomeEntity
 import com.joshdev.expensetracker.data.local.ExpenseDatabase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlin.math.exp
 
 class ExpenseRepository(private val expenseDatabase: ExpenseDatabase) {
 
@@ -97,9 +96,6 @@ class ExpenseRepository(private val expenseDatabase: ExpenseDatabase) {
         return incomeDao.getIncomesByCategory(categoryId)
     }
 
-    fun getTotalIncome(): Flow<Double> {
-        return incomeDao.getTotalIncome()
-    }
 
     suspend fun markExpenseAsSynced(id: Int){
         expenseDao.markExpenseAsSynced(id)
@@ -139,5 +135,13 @@ class ExpenseRepository(private val expenseDatabase: ExpenseDatabase) {
 
     suspend fun getIncomeBySyncId(syncId:String): IncomeEntity?{
         return incomeDao.getIncomeBySyncId(syncId)
+    }
+
+    suspend fun deleteAllExpenses(){
+        expenseDao.deleteAll()
+    }
+
+    suspend fun deleteAllIncomes(){
+        incomeDao.deleteAll()
     }
 }
