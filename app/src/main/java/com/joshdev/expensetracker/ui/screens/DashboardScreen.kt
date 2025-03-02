@@ -60,27 +60,6 @@ fun DashboardScreen(
 
     val sortedList = mixedTransactions.sortedByDescending { it.date }
 
-//    val sortedExpenses = expenses.sortedByDescending { it.date }.toMutableList()
-//    val sortedIncomes = incomes.sortedByDescending { it.date }.toMutableList()
-//    val mergedTransactions = mutableListOf<Pair<Any, String>>()
-
-//    while (sortedExpenses.isNotEmpty() || sortedIncomes.isNotEmpty()) {
-//        when {
-//            sortedExpenses.isEmpty() -> {
-//                mergedTransactions.add(sortedIncomes.removeAt(0) to "income")
-//            }
-//            sortedIncomes.isEmpty() -> {
-//                mergedTransactions.add(sortedExpenses.removeAt(0) to "expense")
-//            }
-//            sortedExpenses.first().date >= sortedIncomes.first().date -> {
-//                mergedTransactions.add(sortedExpenses.removeAt(0) to "expense")
-//            }
-//            else -> {
-//                mergedTransactions.add(sortedIncomes.removeAt(0) to "income")
-//            }
-//        }
-//    }
-
     Scaffold(
         topBar = {
             TopAppBar(
