@@ -2,7 +2,12 @@ package com.joshdev.expensetracker.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -29,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.joshdev.expensetracker.data.entity.ExpenseEntity
 import com.joshdev.expensetracker.ui.screens.components.AddExpenseDialog
+import com.joshdev.expensetracker.ui.screens.components.CategoryFilterDropdown
 import com.joshdev.expensetracker.ui.screens.components.ExpenseItem
 import com.joshdev.expensetracker.ui.viewmodel.ExpenseViewModel
 
@@ -38,6 +44,7 @@ fun ExpenseScreen(viewModel: ExpenseViewModel = viewModel()) {
     val expenses by viewModel.expenses.collectAsState()
     val categories by viewModel.categories.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
+    var selectedCategory by remember { mutableStateOf<Int?>(null) }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Expenses") }) },
@@ -51,22 +58,51 @@ fun ExpenseScreen(viewModel: ExpenseViewModel = viewModel()) {
             }
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-            if (expenses.isEmpty()) {
-                Text(
-                    text = "No expenses found",
-                    modifier = Modifier.align(Alignment.Center),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp),
-                    color = Color.Gray
-                )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(8.dp)
+        ) {
+            Row(
+                modifier = Modifier.align(alignment = Alignment.End)
+                    .padding(end = 15.dp) ,
+                horizontalArrangement = Arrangement.End
+            ) {
+                Row (
+                    modifier = Modifier.fillMaxWidth(0.5f)
+                ){
+                    CategoryFilterDropdown(
+                        categories = categories,
+                        selectedCategory = selectedCategory,
+                        onCategorySelected = { selectedCategory = it },
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            val filteredExpenses = if (selectedCategory == null) {
+                expenses
+            } else {
+                expenses.filter { it.categoryId == selectedCategory }
+            }
+
+            if (filteredExpenses.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "No expenses found",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontSize = 20.sp),
+                        color = Color.Gray
+                    )
+                }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(expenses) { expense ->
-                        val categoryName: String =
-                            categories.find { it.id == expense.categoryId }?.name ?: ""
+                    items(filteredExpenses) { expense ->
+                        val categoryName = categories.find { it.id == expense.categoryId }?.name ?: ""
                         ExpenseItem(
                             expense = expense,
                             categoryName = categoryName,
